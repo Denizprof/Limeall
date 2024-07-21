@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: scroll;
+            background: #f9f9f9;
+        }
+        #chat input {
+            width: 80%;
+        }
+        #chat button {
+            width: 18%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Application</h1>
+    <a href="{{ url_for('upload_file') }}">Upload File</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+    
+    <div id="chat">
+        <div id="messages"></div>
+    </div>
+    <input id="message" type="text" placeholder="Type a message...">
+    <button id="send">Send</button>
+
+    <script>
+        $(document).ready(function() {
+            const socket = io();
+            const username = "{{ current_user.get_id() }}";
+
+            $('#send').click(function() {
+                const message = $('#message').val();
+                if (message.trim() !== '') {
+                    socket.emit('message', { username: username, message: message });
+                    $('#message').val('');
+                }
+            });
+
+            socket.on('message', function(data) {
+                const messageElement = $('<div>').text(`${data.username}: ${data.message}`);
+                $('#messages').append(messageElement);
+                $('#chat').scrollTop($('#chat')[0].scrollHeight);
+            });
+        });
+    </script>
+</body>
+</html>
